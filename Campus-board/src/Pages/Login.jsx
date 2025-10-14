@@ -24,7 +24,7 @@ export default function Login() {
       if (!res.ok) throw new Error("Login failed");
       const data = await res.json();
       login(data); // store {username, role}
-      navigate("/allnotices");
+      navigate("/");
     } catch {
       setError("Invalid credentials");
     }
