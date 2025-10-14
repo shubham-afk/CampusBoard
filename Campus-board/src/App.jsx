@@ -7,6 +7,7 @@ import Sidebar from "./Components/Sidebar";
 import Default from "./Pages/Default";
 import AllNotices from "./Pages/AllNotices";
 import CreatePost from "./Pages/CreatePost";
+import LostFound from "./Pages/LostFound";
 
 import "./App.css";
 
@@ -28,6 +29,7 @@ function App() {
                 <Route path="/" element={<Default />} />
                 <Route path="/allnotices" element={<AllNotices />} />
                 <Route path="/createpost" element={<CreatePost />} />
+                <Route path="/lostfound" element={<LostFound />} />
               </Routes>
             </main>
           </div>

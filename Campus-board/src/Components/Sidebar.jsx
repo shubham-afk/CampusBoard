@@ -28,6 +28,13 @@ export default function Sidebar() {
         >
           ➕ Create Post
         </Link>
+        <Link
+          to="/lostfound"
+          className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-amber-400 hover:text-slate-800 transition-all font-semibold"
+        >
+          🧳 Lost & Found
+        </Link>
+
       </nav>
     </aside>
   );

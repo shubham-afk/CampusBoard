@@ -1,52 +1,140 @@
-// context/NoticeContext.jsx
-import React, { createContext, useContext, useState, useEffect } from "react";
+// import React, { createContext, useContext, useState, useEffect } from "react";
+
+// const NoticeContext = createContext();
+
+// export const NoticeProvider = ({ children }) => {
+//   const [notices, setNotices] = useState(() => {
+//     const stored = localStorage.getItem("notices");
+//     return stored
+//       ? JSON.parse(stored)
+//       : [
+//         {
+//           id: 1,
+//           title: "Lost ID Card",
+//           author: "John Doe",
+//           date: "2025-10-12",
+//           time: "10:00",
+//           department: "CSE",
+//           category: "lost"
+//         }
+//       ];
+//   });
+
+//   // Persist notices to localStorage whenever changed
+//   useEffect(() => {
+//     localStorage.setItem("notices", JSON.stringify(notices));
+//   }, [notices]);
+
+//   // Add a new notice
+//   const addNotice = (notice) => {
+//     const newNotice = {
+//       ...notice,
+//       id:
+//         notice.id ||
+//         (notices.length > 0 ? notices[notices.length - 1].id + 1 : 1), // auto-increment
+//     };
+//     setNotices((prev) => [...prev, newNotice]);
+//   };
+
+//   return (
+//     <NoticeContext.Provider value={{ notices, addNotice }}>
+//       {children}
+//     </NoticeContext.Provider>
+//   );
+// };
+
+// export const useNotices = () => useContext(NoticeContext);
+
+
+// src/context/NoticeContext.jsx
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 const NoticeContext = createContext();
 
+const API_BASE =
+  import.meta.env.VITE_API_URL?.replace(/\/+$/, "") || "http://127.0.0.1:8000";
+
 export const NoticeProvider = ({ children }) => {
-  const [notices, setNotices] = useState(() => {
-    const stored = localStorage.getItem("notices");
-    return stored
-      ? JSON.parse(stored)
-      : [
-          {
-            id: 1,
-            title: "PhD Viva Voice of Ms. Poonam S. Jindal (Biotechnology)",
-            author: "Admin",
-            date: "Yesterday",
-            time: "02:00 PM",
-            department: "Placement Office",
-          },
-          {
-            id: 2,
-            title:
-              "Wipro Ltd. Ltd. Submission of Bio-data for pre-final year students",
-            author: "Placement Office",
-            date: "Yesterday",
-            time: "01:00 PM",
-            department: "Placement Office",
-          },
-        ];
-  });
+  const [notices, setNotices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // Persist notices to localStorage whenever changed
-  useEffect(() => {
-    localStorage.setItem("notices", JSON.stringify(notices));
-  }, [notices]);
-
-  // Add a new notice
-  const addNotice = (notice) => {
-    const newNotice = {
-      ...notice,
-      id:
-        notice.id ||
-        (notices.length > 0 ? notices[notices.length - 1].id + 1 : 1), // auto-increment
-    };
-    setNotices((prev) => [...prev, newNotice]);
+  const fetchNotices = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const res = await fetch(`${API_BASE}/notices`);
+      if (!res.ok) throw new Error(`GET /notices failed: ${res.status}`);
+      const data = await res.json();
+      setNotices(data);
+    } catch (e) {
+      console.error(e);
+      setError("Failed to load notices.");
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const addNotice = async (notice) => {
+    // Backend auto-generates id; do NOT send user-provided id
+    const payload = {
+      title: notice.title,
+      author: notice.author,
+      department: notice.department,
+      category: notice.category,
+      date: notice.date,
+      time: notice.time,
+    };
+    const res = await fetch(`${API_BASE}/notices`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error(`POST /notices failed: ${res.status}`);
+    await fetchNotices();
+  };
+
+  const deleteNotice = async (id) => {
+    const res = await fetch(`${API_BASE}/notices/${id}`, { method: "DELETE" });
+    if (!res.ok) throw new Error(`DELETE /notices/${id} failed: ${res.status}`);
+    await fetchNotices();
+  };
+
+  // Optional: for editing support later (your backend can add PUT /notices/{id})
+  const updateNotice = async (id, updates) => {
+    const res = await fetch(`${API_BASE}/notices/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    });
+    if (!res.ok) throw new Error(`PUT /notices/${id} failed: ${res.status}`);
+    await fetchNotices();
+  };
+
+  // Optional: fetch single (if you add GET /notices/{id} later)
+  const getNotice = async (id) => {
+    const res = await fetch(`${API_BASE}/notices/${id}`);
+    if (!res.ok) throw new Error(`GET /notices/${id} failed: ${res.status}`);
+    return res.json();
+  };
+
+  useEffect(() => {
+    fetchNotices();
+  }, []);
+
   return (
-    <NoticeContext.Provider value={{ notices, addNotice }}>
+    <NoticeContext.Provider
+      value={{
+        notices,
+        loading,
+        error,
+        fetchNotices,
+        addNotice,
+        deleteNotice,
+        updateNotice,
+        getNotice,
+      }}
+    >
       {children}
     </NoticeContext.Provider>
   );
