@@ -6,11 +6,11 @@ export default function Header() {
       <div className="px-6 py-3 flex items-center justify-end">
         <div className="flex items-center gap-7">
           <span className="text-2xl font-bold text-indigo-700">
-            CampusBoard
+            CampusTalks
           </span>
           <img
             src={logo}
-            alt="CampusBoard Logo"
+            alt="CampusTalks Logo"
             className="h-10 w-10 object-contain"
           />
         </div>
