@@ -68,6 +68,10 @@ export default function Login() {
         >
           Login
         </button>
+        <div className="text-center text-sm">
+          New user? <a href="/signup" className="text-indigo-700 underline">Create an account</a>
+        </div>
+
       </form>
     </div>
   );

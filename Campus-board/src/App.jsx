@@ -9,6 +9,8 @@ import LostFound from "./Pages/LostFound";
 import { UserProvider, useUser } from "./context/UserContext";
 import Login from "./Pages/Login";
 import ClaimedItems from "./Pages/ClaimedItems";
+import Signup from "./Pages/Signup";
+
 import "./App.css";
 
 // Wrapper to protect routes
@@ -24,6 +26,7 @@ function AppRoutes() {
       {/* Redirect root to login if not logged in */}
       <Route path="/" element={user ? <Default /> : <Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
       <Route
         path="/allnotices"
         element={
