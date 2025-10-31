@@ -45,7 +45,7 @@ export default function LostFound() {
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-indigo-50 to-white p-8">
       <h1 className="text-3xl font-bold text-indigo-700 mb-8 text-center">
-        🧳 Lost & Found
+        🕵️ Lost & Found
       </h1>
 
       {lostFoundNotices.length === 0 ? (
