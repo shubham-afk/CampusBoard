@@ -1,3 +1,4 @@
+// src/Components/Sidebar.jsx
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../Logo/Logo.png";
 import { useUser } from "@/context/UserContext";
@@ -20,9 +21,7 @@ export default function Sidebar() {
             alt="CampusTalks Logo"
             className="h-10 w-10 object-contain mb-2"
           />
-          <span className="text-2xl font-bold text-indigo-400">
-            CampusTalks
-          </span>
+          <span className="text-2xl font-bold text-indigo-400">CampusTalks</span>
         </Link>
 
         {/* Navigation Links */}
@@ -59,6 +58,16 @@ export default function Sidebar() {
               🧾 Claimed Items
             </Link>
           )}
+
+          {/* NEW: Claims review page for admin */}
+          {user?.role === "admin" && (
+            <Link
+              to="/claims"
+              className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-amber-400 hover:text-slate-800 transition-all font-semibold"
+            >
+              🛠️ Claims (Review)
+            </Link>
+          )}
         </nav>
       </div>
 
@@ -67,12 +76,8 @@ export default function Sidebar() {
         {user ? (
           <div className="flex flex-col gap-2">
             <div className="flex flex-col text-center">
-              <span className="font-semibold text-indigo-300">
-                {user.username}
-              </span>
-              <span className="text-slate-400 text-xs capitalize">
-                {user.role}
-              </span>
+              <span className="font-semibold text-indigo-300">{user.username}</span>
+              <span className="text-slate-400 text-xs capitalize">{user.role}</span>
             </div>
             <Button
               variant="outline"

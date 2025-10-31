@@ -1,6 +1,4 @@
-
-
-
+// src/App.jsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { NoticeProvider } from "./context/NoticeContext";
 import Header from "./Components/Header";
@@ -13,6 +11,7 @@ import { UserProvider, useUser } from "./context/UserContext";
 import Login from "./Pages/Login";
 import ClaimedItems from "./Pages/ClaimedItems";
 import Signup from "./Pages/Signup";
+import ClaimsReview from "./Pages/ClaimsReview";
 
 import "./App.css";
 
@@ -42,7 +41,6 @@ function AppRoutes() {
         path="/createpost"
         element={
           <ProtectedRoute>
-            {/* additional admin check: redirect non-admin to /allnotices */}
             {user?.role === "admin" ? <CreatePost /> : <Navigate to="/allnotices" replace />}
           </ProtectedRoute>
         }
@@ -60,6 +58,15 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <ClaimedItems />
+          </ProtectedRoute>
+        }
+      />
+      {/* NEW: Claims review route */}
+      <Route
+        path="/claims"
+        element={
+          <ProtectedRoute>
+            {user?.role === "admin" ? <ClaimsReview /> : <Navigate to="/allnotices" replace />}
           </ProtectedRoute>
         }
       />

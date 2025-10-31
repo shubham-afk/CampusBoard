@@ -1,3 +1,4 @@
+// src/Pages/ClaimedItems.jsx
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -10,6 +11,7 @@ export default function ClaimedItems() {
   const fetchClaimed = async () => {
     try {
       const res = await fetch(`${API_BASE}/claimed`);
+      if (!res.ok) throw new Error("Failed to fetch claimed items");
       const data = await res.json();
       setClaimed(data);
     } catch (e) {
@@ -28,9 +30,7 @@ export default function ClaimedItems() {
       </h1>
 
       {claimed.length === 0 ? (
-        <div className="text-center text-gray-500 mt-10">
-          No claimed items yet.
-        </div>
+        <div className="text-center text-gray-500 mt-10">No claimed items yet.</div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {claimed.map((item) => (
@@ -53,9 +53,7 @@ export default function ClaimedItems() {
                 <p>
                   <strong>Time:</strong> {item.time}
                 </p>
-                <p className="text-green-700 font-medium">
-                  Claimed by: {item.claimed_by}
-                </p>
+                <p className="text-green-700 font-medium">Claimed by: {item.claimed_by}</p>
               </CardContent>
             </Card>
           ))}

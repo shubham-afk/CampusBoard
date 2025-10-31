@@ -1,3 +1,4 @@
+// src/context/NoticeContext.jsx
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 const NoticeContext = createContext();
@@ -58,7 +59,6 @@ export const NoticeProvider = ({ children }) => {
     await fetchNotices();
   };
 
-  // Optional: for editing support later (your backend can add PUT /notices/{id})
   const updateNotice = async (id, updates) => {
     const res = await fetch(`${API_BASE}/notices/${id}`, {
       method: "PUT",
@@ -69,12 +69,90 @@ export const NoticeProvider = ({ children }) => {
     await fetchNotices();
   };
 
-  // Optional: fetch single (if you add GET /notices/{id} later)
   const getNotice = async (id) => {
     const res = await fetch(`${API_BASE}/notices/${id}`);
     if (!res.ok) throw new Error(`GET /notices/${id} failed: ${res.status}`);
     return res.json();
   };
+
+  // -------- new functions for claim workflow --------
+  const requestClaim = async (id) => {
+    try {
+      const stored = localStorage.getItem("user");
+      const username = stored ? JSON.parse(stored).username : null;
+      if (!username) throw new Error("Not logged in");
+
+      const res = await fetch(`${API_BASE}/notices/${id}/claim`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", username },
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.detail || `Claim failed: ${res.status}`);
+      }
+      await fetchNotices();
+      return true;
+    } catch (e) {
+      console.error(e);
+      throw e;
+    }
+  };
+
+  const fetchPendingClaims = async () => {
+    try {
+      const stored = localStorage.getItem("user");
+      const username = stored ? JSON.parse(stored).username : null;
+      const headers = username ? { username } : {};
+      const res = await fetch(`${API_BASE}/claims`, { headers });
+      if (!res.ok) throw new Error("Failed to fetch pending claims");
+      return res.json();
+    } catch (e) {
+      console.error(e);
+      return [];
+    }
+  };
+
+  const approveClaim = async (id) => {
+    try {
+      const stored = localStorage.getItem("user");
+      const username = stored ? JSON.parse(stored).username : null;
+      const res = await fetch(`${API_BASE}/claims/${id}/approve`, {
+        method: "POST",
+        headers: { username },
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.detail || `Approve failed: ${res.status}`);
+      }
+      await fetchNotices();
+      return true;
+    } catch (e) {
+      console.error(e);
+      throw e;
+    }
+  };
+
+  const rejectClaim = async (id) => {
+    try {
+      const stored = localStorage.getItem("user");
+      const username = stored ? JSON.parse(stored).username : null;
+      const res = await fetch(`${API_BASE}/claims/${id}/reject`, {
+        method: "POST",
+        headers: { username },
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.detail || `Reject failed: ${res.status}`);
+      }
+      await fetchNotices();
+      return true;
+    } catch (e) {
+      console.error(e);
+      throw e;
+    }
+  };
+
+  // --------------------------------------------------
 
   useEffect(() => {
     fetchNotices();
@@ -91,6 +169,10 @@ export const NoticeProvider = ({ children }) => {
         deleteNotice,
         updateNotice,
         getNotice,
+        requestClaim,
+        fetchPendingClaims,
+        approveClaim,
+        rejectClaim,
       }}
     >
       {children}

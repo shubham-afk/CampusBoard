@@ -1,3 +1,4 @@
+// src/Pages/LostFound.jsx
 import React from "react";
 import { useNotices } from "@/context/NoticeContext";
 import { useUser } from "@/context/UserContext";
@@ -5,11 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 
-const API_BASE =
-  import.meta.env.VITE_API_URL?.replace(/\/+$/, "") || "http://127.0.0.1:8000";
-
 export default function LostFound() {
-  const { notices, fetchNotices } = useNotices();
+  const { notices, fetchNotices, requestClaim } = useNotices();
   const { user } = useUser();
 
   const lostFoundNotices = notices.filter(
@@ -23,22 +21,11 @@ export default function LostFound() {
     }
 
     try {
-      const res = await fetch(`${API_BASE}/notices/${id}/claim`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          username: user.username,
-        },
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        alert(data.detail || "Failed to claim.");
-        return;
-      }
+      await requestClaim(id);
       await fetchNotices();
-      alert("✅ Item claimed successfully!");
+      alert("✅ Claim submitted — the item is under review by admin.");
     } catch (e) {
-      console.error(e);
+      alert(e.message || "Failed to submit claim.");
     }
   };
 
@@ -72,29 +59,25 @@ export default function LostFound() {
                   } text-white rounded-t-2xl`}
                 >
                   <CardTitle className="text-lg font-semibold">
-                    {notice.category === "lost"
-                      ? "🕵️ Lost Item"
-                      : "🎉 Found Item"}
+                    {notice.category === "lost" ? "🕵️ Lost Item" : "🎉 Found Item"}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 space-y-2">
-                  <h2 className="font-bold text-lg text-gray-800">
-                    {notice.title}
-                  </h2>
+                  <h2 className="font-bold text-lg text-gray-800">{notice.title}</h2>
                   <p className="text-sm text-gray-600">
                     <span className="font-medium">Author:</span> {notice.author}
                   </p>
                   <p className="text-sm text-gray-600">
-                    <span className="font-medium">Department:</span>{" "}
-                    {notice.department}
+                    <span className="font-medium">Department:</span> {notice.department}
                   </p>
                   <div className="flex justify-between text-sm text-gray-500 mt-3">
                     <span>{notice.date}</span>
                     <span>{notice.time}</span>
                   </div>
 
-                  {/* ✅ Claim Button */}
+                  {/* Claim button visible when item is lost, not pending, not approved, and user is not admin */}
                   {notice.category === "lost" &&
+                    notice.claim_status !== "pending" &&
                     !notice.claimed_by &&
                     user?.role !== "admin" && (
                       <Button
@@ -105,7 +88,16 @@ export default function LostFound() {
                       </Button>
                     )}
 
-                  {notice.claimed_by && (
+                  {/* Under review */}
+                  {notice.claim_status === "pending" && (
+                    <div className="mt-3 text-sm font-medium text-amber-600">
+                      ⏳ Under review
+                      {notice.claim_requested_by ? ` — claimed by ${notice.claim_requested_by}` : ""}
+                    </div>
+                  )}
+
+                  {/* Approved claimed */}
+                  {notice.claim_status === "approved" && notice.claimed_by && (
                     <div className="mt-3 text-sm font-medium text-green-600">
                       ✅ Claimed by {notice.claimed_by}
                     </div>
